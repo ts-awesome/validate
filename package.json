@@ -1,0 +1,27 @@
+{
+  "name": "@viatsyshyn/ts-validate",
+  "version": "0.1.0",
+  "description": "TypeScript Model Validation",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc && cp src/*.d.ts dist/src/",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "validate.js": "^0.12.0",
+    "reflect-metadata": "^0.1.13"
+  },
+  "peerDependencies": {
+    "inversify": "^5.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^3.3.3",
+    "inversify": "^5.0.0",
+    "@types/inversify": "^2.0.0",
+    "@types/validate.js": "^0.11.0",
+    "@types/reflect-metadata": "^0.1.0"
+  },
+  "author": "Volodymyr Iatsyshyn <viatsyshyn@gmail.com>",
+  "license": "ISC"
+}
