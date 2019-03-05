@@ -1,4 +1,4 @@
-import {IEntityValidationMeta, IValidationOptions, IValidator} from "./interfaces";
+import {IEntityValidationMeta, IValidationOptions, IValidator, IModelValidationOptions} from "./interfaces";
 import {Container} from "inversify";
 import {ValidationMeta} from "./decorators";
 import Symbols from './symbols';
@@ -50,7 +50,7 @@ export class ModelValidator<T> implements IValidator<T> {
     this.metadata = (<any>Model.prototype)[ValidationMeta];
   }
 
-  validate(value: T, options: IValidationOptions = {}): true | string[] {
+  validate(value: T, options: IModelValidationOptions = {}): true | string[] {
     const errors: string[] = [];
     const fieldValidationRes = validateFieldNames<T>(value, this.metadata, errors);
 
@@ -59,7 +59,7 @@ export class ModelValidator<T> implements IValidator<T> {
     return <true>(fieldValidationRes && valueValidationRes) || errors;
   }
 
-  private getConstraint({requirePrimary, requireRequired}: IValidationOptions): any {
+  private getConstraint({requirePrimary, requireRequired}: IModelValidationOptions): any {
     let res: any = {};
 
     this.metadata.fields.forEach((v, k) => {

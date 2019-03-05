@@ -128,6 +128,6 @@ export const defaults = {
 export default function register(kernel: Container) {
   Object.keys(defaults).forEach(key => {
     kernel.bind<any>(Symbols.Constraint).toConstantValue(defaults[key]).whenTargetNamed(key);
-    kernel.bind<any>(Symbols.Validator).toConstantValue(new SingleValidator(kernel, key))
+    kernel.bind<any>(Symbols.Validator).toConstantValue(new SingleValidator(kernel, key)).whenTargetNamed(key)
   });
 }
