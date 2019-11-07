@@ -1,7 +1,7 @@
 import {IEntityValidationMeta, IValidationFieldMeta} from "./interfaces";
 import "reflect-metadata";
 
-export const ValidationMeta = Symbol();
+export const ValidationMeta = Symbol.for('ValidationMeta');
 
 function ensureMetadata(proto: any): IEntityValidationMeta {
   if (!proto[ValidationMeta]) {

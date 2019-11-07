@@ -1,4 +1,4 @@
 export default {
-  Validator: Symbol(),
-  Constraint: Symbol()
+  Validator: Symbol.for('Validator'),
+  Constraint: Symbol.for('Constraint')
 }
