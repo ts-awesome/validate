@@ -5,22 +5,22 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc && cp src/*.d.ts dist/src/",
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "validate.js": "^0.12.0",
+    "validate.js": "^0.13.1",
     "reflect-metadata": "^0.1.13"
   },
   "peerDependencies": {
     "inversify": "^5.0.0"
   },
   "devDependencies": {
-    "typescript": "^3.3.3",
-    "inversify": "^5.0.0",
     "@types/inversify": "^2.0.0",
+    "@types/reflect-metadata": "^0.1.0",
     "@types/validate.js": "^0.11.0",
-    "@types/reflect-metadata": "^0.1.0"
+    "inversify": "^5.0.0",
+    "typescript": "^3.7.4"
   },
   "author": "Volodymyr Iatsyshyn <viatsyshyn@gmail.com>",
   "license": "ISC"

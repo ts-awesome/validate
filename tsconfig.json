@@ -2,7 +2,22 @@
   "compileOnSave": true,
   "compilerOptions": {
     "target": "es5",
-    "lib": ["es2017", "es7", "es6", "dom"],
+    "lib": [
+      "es5",
+      "es6",
+      "es7",
+      "dom",
+      "dom.iterable",
+      "es2015",
+      "es2016.array.include",
+      "es2017.object",
+      "es2017.string",
+      "es2018.promise",
+      "es2019.array",
+      "es2019.object",
+      "es2019.string",
+      "es2019.symbol"
+    ],
     "declaration": true,
     "module": "commonjs",
     "moduleResolution": "node",
@@ -13,6 +28,7 @@
     "preserveConstEnums": true,
     "suppressImplicitAnyIndexErrors": true,
     "strictNullChecks": true,
+    "downlevelIteration": true,
     "outDir": "dist"
   },
   "exclude": [

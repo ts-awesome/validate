@@ -1,21 +1,33 @@
-import {IValidator, ISingleValidationOptions} from "./interfaces";
+import {IValidator, ISingleValidationOptions, ValidationMeta} from "./interfaces";
 import {single} from 'validate.js';
 import {Container} from "inversify";
-import Symbols from './symbols';
+import {prepare} from "./utils";
+import {notNull, presence} from "./validators";
 
 export class SingleValidator<T> implements IValidator<T> {
-  constructor(private kernel: Container, private type: string) {}
+  constructor(private kernel: Container, private constraint: ValidationMeta) {}
 
   validate(value: T, options?: ISingleValidationOptions): true | string[] {
-    let constraint: any = {
-      ...this.kernel.getNamed(Symbols.Constraint, this.type)
-    };
-    if (options && options.required) {
-      constraint.presence = true;
+    let constraint = prepare(this.constraint, this.kernel);
+    if (options?.required) {
+      constraint = {
+        ...constraint,
+        ...presence({allowEmpty: !options.notNullable}),
+      }
     }
-    if(options && options.notNullable) {
-      constraint.not_nullable = true
+    if (options?.notNullable) {
+      constraint = {
+        ...constraint,
+        ...notNull(),
+      }
     }
-    return single(value, constraint) === undefined ? true : [];
+
+    const result = single(value, constraint);
+
+    if (result !== undefined) {
+      return Array.isArray(result) ? result : [result];
+    }
+
+    return true;
   }
 }
