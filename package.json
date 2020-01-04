@@ -9,8 +9,10 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "validate.js": "^0.13.1",
-    "reflect-metadata": "^0.1.13"
+    "date-fns": "^2.8.1",
+    "reflect-metadata": "^0.1.13",
+    "uuid-validate": "0.0.3",
+    "validate.js": "^0.13.1"
   },
   "peerDependencies": {
     "inversify": "^5.0.0"
@@ -18,6 +20,7 @@
   "devDependencies": {
     "@types/inversify": "^2.0.0",
     "@types/reflect-metadata": "^0.1.0",
+    "@types/uuid-validate": "0.0.1",
     "@types/validate.js": "^0.11.0",
     "inversify": "^5.0.0",
     "typescript": "^3.7.4"

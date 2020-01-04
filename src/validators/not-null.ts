@@ -1,9 +1,9 @@
 import {validators} from 'validate.js';
 import {ValidatorFunction, ValidatorInstance, ValidatorOptions} from "../interfaces";
 
-validators.not_nullable = ((value) => {
+validators.not_nullable = ((value, options) => {
   if (value === null) {
-    return 'Null is not allowed';
+    return options.message ?? 'should be not null';
   }
   return;
 }) as ValidatorFunction;

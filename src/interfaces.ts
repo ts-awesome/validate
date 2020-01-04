@@ -38,12 +38,22 @@ export interface IValidationFieldMeta {
   primary?: boolean;
   required?: boolean;
   allowNull?: boolean;
-  type?: string;
+  type?: string | symbol;
   array?: boolean;
 }
 
-export type ValidationMeta<T=any> = ReadonlyArray<ValidatorInstance<string> | ValidatorFunction<T>> | symbol;
+export type ValidationMeta<T=any> = ReadonlyArray<ValidatorInstance<string> | ValidatorFunction<T>> | ValidatorInstance<string> | symbol | string;
 
 export interface IEntityValidationMeta {
   fields: Map<string, ValidationMeta>;
+}
+
+export interface IContainer {
+  getNamed<T>(identifier: string | symbol, name: string | symbol): T;
+
+  bind<T>(identifier: string | symbol): {
+    toConstantValue(v: T): {
+      whenTargetNamed(name: string): void;
+    }
+  }
 }

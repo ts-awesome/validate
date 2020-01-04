@@ -11,13 +11,13 @@ validators.array = ((value, options) => {
 
   // Finally validate the value
   if (!isArray(value)) {
-    return "must be an array";
+    return options.message ?? options.notValid ?? "must be an array";
   }
 
   if (options.length !== undefined) {
     const errors = single(value, options.length);
     if (errors !== undefined) {
-      return `array element invalid: ${errors.toString()}`;
+      return options.message ?? options.notValidLength ?? `length ${errors.toString()}`;
     }
   }
 
@@ -25,7 +25,7 @@ validators.array = ((value, options) => {
     for (let element of value) {
       const errors = single(element, options.element);
       if (errors !== undefined) {
-        return `array element invalid: ${errors.toString()}`;
+        return  options.message ?? options.notValidElement ?? `element ${errors.toString()}`;
       }
     }
   }
@@ -34,6 +34,10 @@ validators.array = ((value, options) => {
 export interface ArrayOptions {
   length?: Omit<LengthOptions<any>, 'tokenizer'>;
   element?: ValidationMeta;
+
+  notValid?: string;
+  notValidLength?: string;
+  notValidElement?: string;
 }
 
 export function array(options?: ValidatorOptions<ArrayOptions>): ValidatorInstance<'array'> {

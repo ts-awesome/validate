@@ -1,7 +1,7 @@
-import Symbols from './symbols';
-import {Container} from "inversify";
+import Symbols, {ConstraintSymbol, ValidatorSymbol} from './symbols';
 import {SingleValidator} from "./single-validator";
-import {boolean, email, type} from "./validators";
+import {boolean, email, type, uuid, url, time, date, datetime} from "./validators";
+import {IContainer} from "./interfaces";
 
 
 export const defaults = {
@@ -21,12 +21,29 @@ export const defaults = {
   email: [
     type('string'),
     email(),
+  ],
+  uuid: [
+    type('string'),
+    uuid(4),
+  ],
+  url: [
+    type('string'),
+    url(),
+  ],
+  time: [
+    time(),
+  ],
+  date: [
+    date(),
+  ],
+  datetime: [
+    datetime(),
   ]
 };
 
-export default function register(kernel: Container) {
+export default function register(kernel: IContainer) {
   Object.keys(defaults).forEach(key => {
-    kernel.bind<any>(Symbols.Constraint).toConstantValue(defaults[key]).whenTargetNamed(key);
-    kernel.bind<any>(Symbols.Validator).toConstantValue(new SingleValidator(kernel, defaults[key])).whenTargetNamed(key)
+    kernel.bind<any>(ConstraintSymbol).toConstantValue(defaults[key]).whenTargetNamed(key);
+    kernel.bind<any>(ValidatorSymbol).toConstantValue(new SingleValidator(key, kernel)).whenTargetNamed(key);
   });
 }

@@ -16,11 +16,11 @@ validators.boolean = ((value, options, key) => {
 
   // Finally validate the value
   if (!isBoolean(value)) {
-    return "must be a boolean";
+    return options.message ?? "must be a boolean";
   }
 
   if (options.equalTo !== undefined && value !== options.equalTo) {
-    return `must be ${options.equalTo}`;
+    return options.message ?? `must be ${options.equalTo}`;
   }
 }) as ValidatorFunction;
 

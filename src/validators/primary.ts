@@ -1,10 +1,10 @@
-import {validators} from 'validate.js';
+import {validators, isDefined} from 'validate.js';
 
 import {IModelValidationOptions, ValidatorFunction, ValidatorInstance, ValidatorOptions} from "../interfaces";
 
 validators.primary = ((value, options, key, attributes, globalOptions: IModelValidationOptions) => {
-  if (globalOptions.requirePrimary !== false && value == null) {
-    return "is required";
+  if (globalOptions.requirePrimary !== false && !isDefined(value)) {
+    return options.message ?? "is required";
   }
 }) as ValidatorFunction;
 

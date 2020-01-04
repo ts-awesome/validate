@@ -20,9 +20,9 @@ function ensureMetadata(proto: any): IEntityValidationMeta {
   return proto[ValidationMetaSymbol];
 }
 
-export function validate(target: any, key: string): PropertyDecorator;
+export function validate(target: any, key: string): void;
 export function validate(validators: Iterable<ValidatorInstance<any> | ValidatorFunction>): Function;
-export function validate(type: string): Function;
+export function validate(kind: string): Function;
 export function validate(constraint: symbol): Function;
 export function validate(meta: IValidationFieldMeta): Function;
 export function validate(): Function;
@@ -36,39 +36,48 @@ export function validate(): any {
 
   let [fieldMeta] = args;
   return function validator (target: any, key: string) {
-    if (typeof fieldMeta === 'symbol' || Array.isArray(fieldMeta)) {
+    if (typeof fieldMeta === 'symbol' || typeof fieldMeta === 'string' || Array.isArray(fieldMeta)) {
       ensureMetadata(target.constructor.prototype).fields.set(key, fieldMeta);
       return ;
     }
 
-    if (typeof fieldMeta?.type === 'symbol') {
+    if (fieldMeta?.type !== undefined) {
       ensureMetadata(target.constructor.prototype).fields.set(key, fieldMeta.type);
       return ;
     }
 
-    if (!fieldMeta || (typeof fieldMeta !== 'string' && !fieldMeta.type)) {
+    let meta: Array<ValidatorInstance<any>> | symbol = [];
+    if (!fieldMeta) {
       const autoType = Reflect.getOwnMetadata("design:type", target, key);
       if (autoType === Object) {
-        throw new Error(`Please add explicit constraints type for "${key}". Auto detect failed`);
+        throw new Error(`Please add explicit constraints for "${key}". Auto detect failed`);
       }
 
-      const typeName = [Number, String, Boolean].indexOf(autoType) >= 0 ? autoType.name.toLowerCase() : autoType.name;
-      fieldMeta = !fieldMeta ? typeName : {
-        ...(fieldMeta as IValidationFieldMeta),
-        type: typeName
+      if ([Number, String, Boolean].indexOf(autoType)) {
+        meta.push(type(autoType.name.toLowerCase()));
+        return
       }
+
+      ensureMetadata(target.constructor.prototype).fields.set(key, autoType.name);
+      return ;
     }
 
-    let fieldM: IValidationFieldMeta = typeof fieldMeta === 'string' ? { type: fieldMeta } : fieldMeta!;
+    let fieldM: IValidationFieldMeta = fieldMeta!;
 
-    let meta: Array<ValidatorInstance<any>> | symbol = [];
-
-    if (fieldM.type) {
+    if (fieldM.array) {
+      meta = [
+        type('array'),
+        array({
+          element: fieldM.type,
+          length: fieldM.required ? {minimum: 1} : undefined,
+        }),
+      ]
+    } else if (fieldM.type) {
       meta.push(type(fieldM.type as any));
     }
 
     if (fieldM.required) {
-      meta.push(required({allowEmpty: !!fieldM.allowNull}));
+      meta.push(required());
     }
 
     if (fieldM.allowNull === false) {
@@ -77,13 +86,6 @@ export function validate(): any {
 
     if (fieldM.primary) {
       meta.push(primary());
-    }
-
-    if (fieldM.array) {
-      meta = [
-        type('array'),
-        array({element: [...meta]}),
-      ]
     }
 
     ensureMetadata(target.constructor.prototype).fields.set(key, meta);
