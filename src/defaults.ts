@@ -1,4 +1,4 @@
-import Symbols, {ConstraintSymbol, ValidatorSymbol} from './symbols';
+import {ConstraintSymbol, ValidatorSymbol} from './symbols';
 import {SingleValidator} from "./single-validator";
 import {boolean, email, type, uuid, url, time, date, datetime} from "./validators";
 import {IContainer} from "./interfaces";

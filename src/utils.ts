@@ -9,7 +9,7 @@ export function prepare(constraint: ValidationMeta, kernel?: IContainer): Valida
     if (kernel == null) {
       throw Error(`Can't resolve ${String(constraint)}. Please provide kernel.`);
     }
-    constraint = kernel.getNamed<Bind>(ConstraintSymbol, this.constraint);
+    constraint = kernel.getNamed<Bind>(ConstraintSymbol, constraint);
   }
 
   if (Array.isArray(constraint)) {
