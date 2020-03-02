@@ -14,7 +14,7 @@ validators.datetime = ((value, options) => {
     return;
   }
 
-  const tpl = options.format ?? 'yyyy-MM-ddTHH:mm:ss.SSSX';
+  const tpl = options.format ?? "yyyy-MM-dd'T'HH:mm:ss.SSSX";
 
   const parsed = toDate(value, tpl);
   if(format(parsed, tpl) !== value) {
