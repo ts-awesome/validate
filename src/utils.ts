@@ -1,4 +1,11 @@
-import {IContainer, IEntityValidationMeta, ValidationMeta, ValidatorFunction, ValidatorInstance} from "./interfaces";
+import {
+  IContainer,
+  IEntityValidationMeta,
+  IModelValidationOptions,
+  ValidationMeta,
+  ValidatorFunction,
+  ValidatorInstance
+} from "./interfaces";
 import {ConstraintSymbol} from "./symbols";
 import * as lib from 'validate.js';
 
@@ -56,13 +63,17 @@ export function single<T>(value: T, ...constraints: ReadonlyArray<ValidatorInsta
   return true;
 }
 
-export function multi<T>(value: T, metadata: IEntityValidationMeta, rules: Record<keyof T, ValidatorInstance<any> | ReadonlyArray<ValidatorInstance<any>>>, options?: any): true | string[] {
+export function multi<T>(
+  value: T, metadata: IEntityValidationMeta,
+  rules: Record<keyof T, ValidatorInstance<any> | ReadonlyArray<ValidatorInstance<any>>>,
+  {restrictExtraFields = true, ... options}: IModelValidationOptions = {}
+): true | string[] {
   for(let attribute of Object.keys(rules)) {
     rules[attribute] = prepare(rules[attribute]);
   }
 
   const errors: string[] = [];
-  const fieldValidationRes = validateFieldNames<T>(value, metadata, errors);
+  const fieldValidationRes = restrictExtraFields ? validateFieldNames<T>(value, metadata, errors): true;
   const valueValidationRes = validateModel(value, rules as any, errors, options);
   return <true>(fieldValidationRes && valueValidationRes) || errors;
 }

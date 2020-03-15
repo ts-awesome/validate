@@ -19,8 +19,9 @@ export interface ValidatorFunction<T=any> {
 }
 
 export interface IModelValidationOptions {
-  requirePrimary?: boolean
-  requireRequired?: boolean
+  requirePrimary?: boolean;
+  requireRequired?: boolean;
+  restrictExtraFields?: boolean;
 }
 
 export interface ISingleValidationOptions {
