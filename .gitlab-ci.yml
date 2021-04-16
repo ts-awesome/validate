@@ -14,9 +14,13 @@ build:
   script:
   - npm run lint
   - npm run build
-  - npm run test -- --collect-coverage --collectCoverageFrom=src/**/*.ts
+  - npm run test -- --ci --reporters=default --reporters=jest-junit --collect-coverage --collectCoverageFrom=src/**/*.ts
   coverage: /All\sfiles.*?\s+(\d+.\d+)/
-
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - junit.xml
 
 publish:
   stage: publish
