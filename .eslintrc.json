@@ -17,7 +17,6 @@
     "@typescript-eslint/eslint-plugin"
   ],
   "rules": {
-    "@typescript-eslint/interface-name-prefix": "off",
     "@typescript-eslint/no-explicit-any": "warn",
     "@typescript-eslint/ban-types": "warn",
     "@typescript-eslint/explicit-function-return-type": "warn"

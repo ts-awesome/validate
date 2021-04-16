@@ -11,17 +11,19 @@ build:
   - develop
   script:
   - npm ci
-  - npm run lint -- --format gitlab
-  - npm run build
-  - npm run test -- --ci --reporters=default --reporters=jest-junit --collect-coverage
+  - npx eslint --format gitlab "src/**/*.ts"
+  - npx tsc
+  - npx jest --ci --reporters=default --reporters=jest-junit --collect-coverage
   coverage: /Lines\s*:\s*(\d+.?\d*)%/
+  variables:
+    ESLINT_CODE_QUALITY_REPORT: codequality.json
   artifacts:
     when: always
     paths:
       - coverage
     reports:
       junit: junit.xml
-      codequality: gl-codequality.json
+      codequality: codequality.json
 
 publish:
   stage: publish
