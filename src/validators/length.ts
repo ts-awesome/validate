@@ -37,7 +37,7 @@ export function length<T extends { length: number } = unknown[]>(options: Valida
       return;
     }
 
-    const errors = [];
+    const errors: string[] = [];
 
     const length = tokenizer(value)?.length;
     if(!isNumber(length)) {

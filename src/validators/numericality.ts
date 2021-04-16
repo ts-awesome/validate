@@ -102,7 +102,7 @@ export function numericality(options: ValidatorOptions<NumericalityOptions> = {}
       return error(message ?? notInteger, "must be an integer", {value, key, validatorOptions, attributes, globalOptions, validator: 'numericality'});
     }
 
-    const errors = [];
+    const errors: string[] = [];
     const prettify = globalOptions?.prettify ?? globalPrettify;
 
     for (const [name, check] of Object.entries(checks)) {

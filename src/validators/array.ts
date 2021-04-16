@@ -42,7 +42,7 @@ export function array(options?: ValidatorOptions<ArrayOptions>): Validator {
     if (isDefined(element)) {
       const constraints: Validator[] = element ?? [];
       let index = 0;
-      const errors = [];
+      const errors: string[] = [];
       for (const element of value) {
         const prop = `[${index}]`;
         const result = validate({[prop]: element}, {[prop]: constraints}, {format: 'flat', fullMessages: true});

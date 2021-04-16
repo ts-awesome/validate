@@ -1,5 +1,7 @@
+import {numericality, presence, length} from "../src";
+import {validate} from '../src/utils';
+
 describe("validate", function() {
-  const {validate} = require('../dist/utils');
 
   it("raises an error if a promise is returned", function() {
     const constraints = {name: [_ => Promise.resolve() ]};
@@ -41,7 +43,7 @@ describe("validate", function() {
   });
 
   describe("run", function() {
-    const {run} = require('../dist/utils');
+    const {run} = require('../src/utils');
 
     it("calls the validator with the val, opts, key, attributes and global options", function() {
       let results;
@@ -108,34 +110,31 @@ describe("validate", function() {
     });
 
     it("calls custom prettify in global options", function() {
-      const {presence} = require('../dist/validators/presence');
-      let prettifyArgs = [];
+      const prettifyArgs: any[] = [];
       function prettify(arg) {
         prettifyArgs.push(arg);
         return "foobar";
       }
       const constraints = {foo: [presence()]}
-      const options = {format: "flat", prettify};
+      const options = {format: 'flat' as never, prettify};
       expect(validate({}, constraints, options)).toEqual(["Foobar can't be blank"]);
       expect(prettifyArgs).toEqual(["foo", undefined]);
     });
 
     it("calls custom prettify in global options inside numericality validator", function() {
-      const {numericality} = require('../dist/validators/numericality');
-      let prettifyArgs = [];
+      const prettifyArgs: any[] = [];
       function prettify(arg) {
         prettifyArgs.push(arg);
         return "foobar";
       }
       const constraints = {foo: [numericality({greaterThan: 0})]};
-      const options = {format: "flat", prettify};
+      const options = {format: 'flat' as never, prettify};
       expect(validate({foo: 0}, constraints, options)).toEqual(["Foobar must be foobar 0"]);
       expect(prettifyArgs).toEqual(["greaterThan", "foo", 0]);
     });
   });
 
   describe("format", function() {
-    const {presence, numericality, length} = require('../dist/validators');
 
     describe("flat", function() {
       it("returns a flat list of errors", function() {
@@ -157,7 +156,7 @@ describe("validate", function() {
 
       it("fullMessages = false", function() {
         const constraints = {foo: [presence()]}
-        const options = {format: "flat", fullMessages: false};
+        const options = {format: 'flat' as never, fullMessages: false};
         expect(validate({}, constraints, options)).toEqual(["can't be blank"]);
       });
 
@@ -220,7 +219,7 @@ describe("validate", function() {
             }),
           ]
         };
-        const options = {format: "raw"};
+        const options = {format: 'raw' as never};
         expect(validate(attributes, constraints, options)).toEqual([{
           attribute: "foo",
           value: "foo",

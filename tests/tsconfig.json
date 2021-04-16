@@ -1,0 +1,8 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "declaration": false,
+    "noImplicitAny": false,
+    "outDir": "../dist"
+  }
+}

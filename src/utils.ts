@@ -108,8 +108,8 @@ function process(
 
 function validate<T extends Record<string, unknown>>(attributes: T, constraints: Record<keyof T, readonly Validator[]>, globalOptions: Omit<GlobalOptions, 'format'> & {format: 'raw'}): undefined | readonly ErrorInfo[];
 function validate<T extends Record<string, unknown>>(attributes: T, constraints: Record<keyof T, readonly Validator[]>, globalOptions: Omit<GlobalOptions, 'format'> & {format: 'flat'}): undefined | readonly string[];
-function validate<T extends Record<string, unknown>>(attributes: T, constraints: Record<keyof T, readonly Validator[]>, globalOptions: Omit<GlobalOptions, 'format'> & {format?: undefined | 'grouped'}): undefined | Readonly<Record<string, readonly string[]>>;
-function validate<T extends Record<string, unknown>>(attributes: T, constraints: Record<keyof T, readonly Validator[]>, globalOptions: GlobalOptions): undefined | readonly ErrorInfo[] | readonly string[] | Readonly<Record<string, readonly string[]>> {
+function validate<T extends Record<string, unknown>>(attributes: T, constraints: Record<keyof T, readonly Validator[]>, globalOptions?: Omit<GlobalOptions, 'format'> & {format?: undefined | 'grouped'}): undefined | Readonly<Record<string, readonly string[]>>;
+function validate<T extends Record<string, unknown>>(attributes: T, constraints: Record<keyof T, readonly Validator[]>, globalOptions: GlobalOptions = {}): undefined | readonly ErrorInfo[] | readonly string[] | Readonly<Record<string, readonly string[]>> {
   const results = run(attributes, constraints, globalOptions);
   return process(results, globalOptions);
 }
