@@ -3,7 +3,7 @@ stages:
 - publish
 
 before_script:
-- npm install
+- npm ci
 
 build:
   stage: build
