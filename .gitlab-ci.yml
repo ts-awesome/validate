@@ -13,10 +13,12 @@ build:
   - npm ci
   - npm run lint -- --format gitlab
   - npm run build
-  - npm run test -- --ci --reporters=default --reporters=jest-junit --collect-coverage --collectCoverageFrom=src/**/*.ts
-  coverage: /All\sfiles.*?\s+(\d+.\d+)/
+  - npm run test -- --ci --reporters=default --reporters=jest-junit --collect-coverage
+  coverage: /Lines\s*:\s*(\d+.?\d*)%/
   artifacts:
     when: always
+    paths:
+      - coverage
     reports:
       junit: junit.xml
       codequality: gl-codequality.json
