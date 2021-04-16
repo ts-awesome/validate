@@ -1,13 +1,20 @@
-import {validators} from 'validate.js';
-import {ValidatorFunction, ValidatorInstance, ValidatorOptions} from "../interfaces";
+import {Validator, ValidatorOptions} from "../interfaces";
+import {error, isDefined} from "./utils";
 
-validators.not_nullable = ((value, options) => {
-  if (value === null) {
-    return options.message ?? 'should be not null';
+export function notNull(options: ValidatorOptions<Record<string, never>> = {}): Validator {
+
+  const {
+    message,
+    ...validatorOptions
+  } = options;
+
+  return function NotNullValidator(value, key, attributes, globalOptions): undefined | string {
+    if (!isDefined(value)) {
+      return
+    }
+
+    if (value === null) {
+      return error(message, "should not be null", {value, key, validatorOptions, attributes, globalOptions, validator: 'notNull'});
+    }
   }
-  return;
-}) as ValidatorFunction;
-
-export function notNull(options?: ValidatorOptions<{}>): ValidatorInstance<'not_nullable'> {
-  return {not_nullable: options ?? true};
 }

@@ -1,17 +1,6 @@
 import isValid = require('uuid-validate');
-import {validators, isDefined, format} from 'validate.js';
-import {ValidatorFunction, ValidatorInstance, ValidatorOptions} from "../interfaces";
-
-validators.uuid = ((value, options) => {
-  if (!isDefined(value)) {
-    return;
-  }
-
-  const version = options.version ?? 4;
-  if (!isValid(value, version)) {
-    return format(options.message ?? `is invalid uuid version ${version}`, {version});
-  }
-}) as ValidatorFunction;
+import {Validator, ValidatorOptions} from "../interfaces";
+import {error, isDefined, isString} from "./utils";
 
 export type UuidVersion = 1 | 2 | 3 | 4 | 5;
 
@@ -19,8 +8,26 @@ export interface UuidOptions {
   version?: UuidVersion;
 }
 
-export function uuid(version?: UuidVersion): ValidatorInstance<'uuid'>;
-export function uuid(options?: ValidatorOptions<UuidOptions>): ValidatorInstance<'uuid'>;
-export function uuid(options?: ValidatorOptions<UuidOptions> | UuidVersion): ValidatorInstance<'uuid'> {
-  return {uuid: typeof options === 'number' ? {version: options} : (options ?? true)};
+export function uuid(version?: UuidVersion): Validator;
+export function uuid(options?: ValidatorOptions<UuidOptions>): Validator;
+export function uuid(options: ValidatorOptions<UuidOptions> | UuidVersion = {}): Validator {
+  const {
+    message,
+    version = 4,
+    ...validatorOptions
+  }: ValidatorOptions<UuidOptions> = typeof options === 'number' ? {version: options} : options
+
+  return function UUIDValidator(value, key, attributes, globalOptions): undefined | string {
+    if (!isDefined(value)) {
+      return;
+    }
+
+    if (!isString(value)) {
+      return error(message, "must be a string", {value, key, validatorOptions, attributes, globalOptions, validator: 'uuid'});
+    }
+
+    if (!isValid(value, version)) {
+      return error(message, "is not valid uuid of version %{version}", {value, key, validatorOptions, attributes, globalOptions, validator: 'uuid', version});
+    }
+  }
 }

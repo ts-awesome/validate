@@ -1,33 +1,24 @@
-import {IEntityValidationMeta, IValidator, IModelValidationOptions, IContainer} from "./interfaces";
+import {ConstructorOf, IEntityValidationMeta, IModelValidationOptions, IValidator, Validator} from "./interfaces";
 import {ValidationMetaSymbol} from "./decorators";
 
-import {multi, prepare} from "./utils";
+import {multi} from "./utils";
 
-interface ConstructorOf<T> {
-  new (...args:any[]): T;
-}
-
-export class ModelValidator<T> implements IValidator<T> {
+export class ModelValidator<T extends Record<string, unknown>> implements IValidator<T> {
 
   private readonly metadata: IEntityValidationMeta;
 
-  constructor(
-    Model: ConstructorOf<T>,
-    private kernel?: IContainer
-  ) {
-    this.metadata = (<any>Model.prototype)[ValidationMetaSymbol];
+  constructor(Model: ConstructorOf<T>) {
+    this.metadata = Model.prototype[ValidationMetaSymbol];
   }
 
-  validate(value: T, options: IModelValidationOptions = {}): true | string[] {
-    const constraints = this.getConstraint();
-    return multi(value, this.metadata, constraints, options);
+  validate(value: T, options: IModelValidationOptions = {}): true | readonly string[] {
+    return multi(value, this.metadata, this.getConstraint<T>(), options);
   }
 
-  private getConstraint(): any {
-    let res: any = {};
-
+  private getConstraint<T>(): Record<keyof T, readonly Validator[]> {
+    const res = {} as Record<keyof T, readonly Validator[]>;
     this.metadata.fields.forEach((meta, property) => {
-      res[property] = prepare(meta, this.kernel);
+      res[property.toString()] = meta;
     });
 
     return res;

@@ -1,22 +1,20 @@
-export type ValidatorInstance<X extends string, T = any> = Record<X, T>;
-
-export interface ValidatorBuilder<T = any> {
-  (value: T): any;
-}
-
 export interface MessageFormatter<T> {
-  (value: T, attribute: any, validatorOptions: any, attributes: any, globalOptions: any): string;
+  (
+    value: T,
+    attribute: string,
+    validatorOptions: Readonly<Record<string, unknown>>,
+    attributes: Readonly<Record<string, unknown>>,
+    globalOptions: Readonly<Record<string, unknown>>,
+    extra?: Readonly<Record<string, unknown>>,
+  ): string;
 }
 
 export interface GenericOptions {
-  message?: string | MessageFormatter<any>;
+  message?: string | MessageFormatter<unknown>;
+  [key: string]: unknown;
 }
 
-export type ValidatorOptions<T> = (T & GenericOptions) | ValidatorBuilder;
-
-export interface ValidatorFunction<T=any> {
-  (value: T, options: Record<string, any>, key: string, attributes: any, globalOptions: Record<string, any>): string | undefined;
-}
+export type ValidatorOptions<T> = T & GenericOptions;
 
 export interface IModelValidationOptions {
   requirePrimary?: boolean;
@@ -32,29 +30,47 @@ export interface ISingleValidationOptions {
 export type IValidationOptions = IModelValidationOptions | ISingleValidationOptions;
 
 export interface IValidator<T> {
-  validate(value: T, options?: IValidationOptions): true | string[];
+  validate(value: T, options?: IValidationOptions): true | readonly string[];
 }
 
 export interface IValidationFieldMeta {
   primary?: boolean;
   required?: boolean;
   allowNull?: boolean;
-  type?: string | symbol;
+  type?: string | ConstructorOf;
   array?: boolean;
+  name?: string;
 }
 
-export type ValidationMeta<T=any> = ReadonlyArray<ValidatorInstance<string> | ValidatorFunction<T>> | ValidatorInstance<string> | symbol | string;
-
-export interface IEntityValidationMeta {
-  fields: Map<string, ValidationMeta>;
+export interface IEntityValidationMeta<T extends Record<string, unknown> = Record<string, unknown>> {
+  aliases: Map<keyof T, string>;
+  fields: Map<keyof T, readonly Validator[]>;
 }
 
-export interface IContainer {
-  getNamed<T>(identifier: string | symbol, name: string | symbol): T;
+export interface Validator<T = unknown> {
+  (
+    value: T,
+    key: string,
+    attributes: Readonly<Record<string, unknown>>,
+    globalOptions: Readonly<GlobalOptions>
+  ): undefined | true | string | readonly string[];
+}
 
-  bind<T>(identifier: string | symbol): {
-    toConstantValue(v: T): {
-      whenTargetNamed(name: string): void;
-    }
-  }
+export interface ErrorInfo<T = unknown> {
+  value: T;
+  error: string;
+  attribute: string;
+  validator: string;
+}
+
+export interface GlobalOptions {
+  format?: 'flat' | 'raw' | 'grouped';
+  fullMessages?: boolean;
+  prettify?: (obj: unknown) => string;
+
+  [key: string]: unknown;
+}
+
+export interface ConstructorOf<T extends Record<string, unknown> = Record<string, unknown>> {
+  new(...args: unknown[]): T;
 }

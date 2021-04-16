@@ -2,92 +2,98 @@ import "reflect-metadata";
 import {
   IEntityValidationMeta,
   IValidationFieldMeta,
-  ValidationMeta,
-  ValidatorFunction,
-  ValidatorInstance
+  Validator,
 } from "./interfaces";
 import {array, notNull, primary, required, type} from "./validators";
+import {isFunction, isString} from "./validators/utils";
+import {model} from "./validators/model";
+
+/* eslint-disable @typescript-eslint/ban-types */
 
 export const ValidationMetaSymbol = Symbol.for('ValidationMetaSymbol');
 
-function ensureMetadata(proto: any): IEntityValidationMeta {
+function ensureMetadata(proto: Object): IEntityValidationMeta {
   if (!proto[ValidationMetaSymbol]) {
     proto[ValidationMetaSymbol] = {
-      fields: new Map<string, ValidationMeta>()
+      aliases: new Map<string, string>(),
+      fields: new Map<string, Validator[]>()
     }
   }
 
   return proto[ValidationMetaSymbol];
 }
 
-export function validate(target: any, key: string): void;
-export function validate(validators: Iterable<ValidatorInstance<any> | ValidatorFunction>): Function;
-export function validate(kind: string): Function;
-export function validate(constraint: symbol): Function;
-export function validate(meta: IValidationFieldMeta): Function;
-export function validate(): Function;
-export function validate(): any {
-  const args = [].slice.call(arguments);
-
-  if (args.length > 1 && typeof args[1] === 'string') {
-    // @ts-ignore
-    return validator(...args);
+export function validate(target: Object, key: string | symbol): void;
+export function validate(name: string, validators: Iterable<Validator>): PropertyDecorator;
+export function validate(validators: Iterable<Validator>): PropertyDecorator;
+/** @deprecated */
+export function validate(meta: IValidationFieldMeta): PropertyDecorator;
+export function validate(): PropertyDecorator;
+export function validate(...args: unknown[]): void | PropertyDecorator {
+  if (args.length > 1 && (typeof args[1] === 'string' || typeof args[1] === 'symbol')) {
+    return validator(...args as [Object, string | symbol]);
   }
 
-  let [fieldMeta] = args;
-  return function validator (target: any, key: string) {
-    if (typeof fieldMeta === 'symbol' || typeof fieldMeta === 'string' || Array.isArray(fieldMeta)) {
-      ensureMetadata(target.constructor.prototype).fields.set(key, fieldMeta);
+  const alias = typeof args[0] === 'string' ? args.shift() : null;
+  const [fieldMeta] = args;
+  return validator;
+
+  function validator (target: Object, key: string | symbol): void {
+    if (typeof fieldMeta === 'symbol' || typeof fieldMeta === 'string'){
+      throw new Error(`No supported`);
+    }
+
+    if (typeof alias === 'string') {
+      ensureMetadata(target.constructor.prototype).aliases.set(key.toString(), alias);
+    }
+
+    if (Array.isArray(fieldMeta)) {
+      ensureMetadata(target.constructor.prototype).fields.set(key.toString(), fieldMeta);
       return ;
     }
 
-    if (fieldMeta?.type !== undefined) {
-      ensureMetadata(target.constructor.prototype).fields.set(key, fieldMeta.type);
-      return ;
-    }
-
-    let meta: Array<ValidatorInstance<any>> | symbol = [];
-    if (!fieldMeta) {
+    if (fieldMeta == null) {
+      const meta: Validator[] = [];
       const autoType = Reflect.getOwnMetadata("design:type", target, key);
       if (autoType === Object) {
-        throw new Error(`Please add explicit constraints for "${key}". Auto detect failed`);
+        throw new Error(`Please add explicit constraints for "${key.toString()}". Auto detect failed`);
       }
 
       if ([Number, String, Boolean].indexOf(autoType)) {
         meta.push(type(autoType.name.toLowerCase()));
-        return
       }
 
-      ensureMetadata(target.constructor.prototype).fields.set(key, autoType.name);
-      return ;
+      ensureMetadata(target.constructor.prototype).fields.set(key.toString(), meta);
+      return;
     }
 
-    let fieldM: IValidationFieldMeta = fieldMeta!;
+    const desc: IValidationFieldMeta = fieldMeta as never;
 
-    if (fieldM.array) {
-      meta = [
-        type('array'),
-        array({
-          element: fieldM.type,
-          length: fieldM.required ? {minimum: 1} : undefined,
-        }),
-      ]
-    } else if (fieldM.type) {
-      meta.push(type(fieldM.type as any));
-    }
-
-    if (fieldM.required) {
+    const meta: Validator[] = [];
+    if (desc.required) {
       meta.push(required());
     }
 
-    if (fieldM.allowNull === false) {
+    if (desc.allowNull === false) {
       meta.push(notNull());
     }
 
-    if (fieldM.primary) {
+    if (desc.primary) {
       meta.push(primary());
     }
 
-    ensureMetadata(target.constructor.prototype).fields.set(key, meta);
-  };
+    if (desc.array) {
+      meta.push(
+        type('array'),
+        array({
+          element: isString(desc.type) ? [type(desc.type as never)] : isFunction(desc.type) ? [model(desc.type)] : undefined,
+          length: desc.required ? {minimum: 1} : undefined,
+        }),
+      );
+    } else if (desc.type) {
+      meta.push(type(desc.type as never));
+    }
+
+    ensureMetadata(target.constructor.prototype).fields.set(key.toString(), meta);
+  }
 }

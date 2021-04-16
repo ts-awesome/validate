@@ -1,13 +1,15 @@
-import {validators, isDefined} from 'validate.js';
+import {Validator, ValidatorOptions} from "../interfaces";
+import {error, isDefined} from "./utils";
 
-import {IModelValidationOptions, ValidatorFunction, ValidatorInstance, ValidatorOptions} from "../interfaces";
+export function primary(options: ValidatorOptions<Record<string, never>> = {}): Validator {
+  const {
+    message,
+    ...validatorOptions
+  } = options;
 
-validators.primary = ((value, options, key, attributes, globalOptions: IModelValidationOptions) => {
-  if (globalOptions.requirePrimary !== false && !isDefined(value)) {
-    return options.message ?? "is required";
+  return function PrimaryValidator(value, key, attributes, globalOptions): undefined | string {
+    if (globalOptions.requirePrimary !== false && !isDefined(value)) {
+      return error(message, "is required", {value, key, validatorOptions, attributes, globalOptions, validator: 'primary'});
+    }
   }
-}) as ValidatorFunction;
-
-export function primary(options?: ValidatorOptions<{}>): ValidatorInstance<'primary'> {
-  return {primary: options ?? true};
 }

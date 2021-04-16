@@ -1,33 +1,33 @@
-import {isDefined, validators} from 'validate.js';
-import {ValidatorFunction, ValidatorInstance, ValidatorOptions} from "../interfaces";
+import {Validator, ValidatorOptions} from "../interfaces";
+import {error, isDefined} from "./utils";
 
 export interface AlphaNumProps {
   allowSpaces?: boolean
 }
 
-validators.alpha_num = ((value, options) => {
-  // Empty values are allowed. Use presence validator along with this validator for required boolean property.
-  if (!isDefined(value)) {
-    return;
-  }
+export function alphaNumeric(allowSpaces: boolean): Validator;
+export function alphaNumeric(options?: ValidatorOptions<AlphaNumProps>): Validator;
+export function alphaNumeric(o?: ValidatorOptions<AlphaNumProps> | boolean): Validator {
+  const {message, ...validatorOptions}: ValidatorOptions<AlphaNumProps> = typeof o === 'boolean' ? {allowSpaces: o} : o ?? {};
 
-  if (typeof value !== 'string') {
-    return options.message ?? "must be string";
-  }
+  return function AlphaNumericValidator(value, key, attributes, globalOptions): undefined | string {
+    // Empty values are allowed. Use presence validator along with this validator for required boolean property.
+    if (!isDefined(value)) {
+      return;
+    }
 
-  if (value?.match(/[!@#$%^&*(),.?":{}|<>]/)) {
-    return options.message ?? `must be alphanumeric`;
-  }
+    if (typeof value !== 'string') {
+      return error(message, "must be string", {value, key, validatorOptions, attributes, globalOptions, validator: 'alphaNumeric'});
+    }
 
-  if (options.allowSpaces === false && /\s/.test(value)) {
-    return options.message ?? `must be alphanumeric without spaces`;
-  }
-}) as ValidatorFunction;
+    if (value?.match(/[!@#$%^&*(),.?":{}|<>]/)) {
+      return error(message, "must be alphanumeric", {value, key, validatorOptions, attributes, globalOptions, validator: 'alphaNumeric'});
+    }
 
-export function alphaNumeric(allowSpaces: boolean): ValidatorInstance<'alpha_num'>;
-export function alphaNumeric(options?: ValidatorOptions<AlphaNumProps>): ValidatorInstance<'alpha_num'>;
-export function alphaNumeric(options?: ValidatorOptions<AlphaNumProps> | boolean): ValidatorInstance<'alpha_num'> {
-  return {alpha_num: typeof options === 'boolean' ? {allowSpaces: options} : options ?? true};
+    if (validatorOptions.allowSpaces === false && /\s/.test(value)) {
+      return error(message, "must be alphanumeric without spaces", {value, key, validatorOptions, attributes, globalOptions, validator: 'alphaNumeric'});
+    }
+  }
 }
 
 

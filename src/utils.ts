@@ -1,99 +1,149 @@
 import {
-  IContainer,
+  ErrorInfo, GlobalOptions,
   IEntityValidationMeta,
-  IModelValidationOptions,
-  ValidationMeta,
-  ValidatorFunction,
-  ValidatorInstance
+  IModelValidationOptions, Validator,
 } from "./interfaces";
-import {ConstraintSymbol} from "./symbols";
-import * as lib from 'validate.js';
+import {capitalize, tpl, isEmpty, prettify} from "./validators/utils";
 
-type Bind<T=any> = ReadonlyArray<ValidatorInstance<string> | ValidatorFunction<T>> | ValidatorInstance<string>;
-
-export function prepare(constraint: ValidationMeta, kernel?: IContainer): ValidatorInstance<any> {
-  if (typeof constraint === 'symbol' || typeof constraint === 'string') {
-    if (kernel == null) {
-      throw Error(`Can't resolve ${String(constraint)}. Please provide kernel.`);
-    }
-    constraint = kernel.getNamed<Bind>(ConstraintSymbol, constraint);
-  }
-
-  if (Array.isArray(constraint)) {
-
-    constraint = constraint.map(value => {
-      if (typeof value !== 'function') {
-        return value;
-      }
-
-      for (let name of Object.keys(lib.validators)) {
-        if (lib.validators[name] === value) {
-          return {[name]: true};
-        }
-      }
-
-      const name = `__dynamic_${Date.now().toString(36)}`;
-      lib.validators[name] = value;
-      return {[name]: true};
-    }).reduce((acc, val) => ({
-      ...acc,
-      ...val
-    }), {}) as any;
-  }
-
-  for(let validator of Object.keys(constraint)) {
-    if (validator === 'array' && typeof constraint[validator] === 'object') {
-      const [element] = constraint[validator] as any;
-      if (element) {
-        constraint[validator].element = prepare(element, kernel);
-      }
-    }
-  }
-
-  return constraint as any;
+function nameOf(x: Validator): string {
+  return x.name || 'anonymous';
 }
 
-export function single<T>(value: T, ...constraints: ReadonlyArray<ValidatorInstance<any>>): true | string[] {
-  const result = lib.single(value, prepare(constraints));
+function flattenErrors(errors: readonly ErrorInfo[]): readonly string[] {
+  const values = errors
+    .map(({error: _}) => _)
+    .filter(_ => _ != null) as string[];
 
-  if (result !== undefined) {
-    return Array.isArray(result) ? result : [result];
-  }
-
-  return true;
+  return [...new Set(values).values()]; // unique
 }
 
-export function multi<T>(
-  value: T, metadata: IEntityValidationMeta,
-  rules: Record<keyof T, ValidatorInstance<any> | ReadonlyArray<ValidatorInstance<any>>>,
+function groupErrorsBy(errors: readonly ErrorInfo[], key: 'attribute' | 'validator'): Record<string, ErrorInfo[]> {
+  const result = {};
+  for (const error of errors) {
+    const _ = error[key];
+    if (!result[_]) {
+      result[_] = [];
+    }
+
+    result[_].push(error);
+  }
+
+  return result;
+}
+
+const formatters = {
+  raw(x: readonly ErrorInfo[]): readonly ErrorInfo[] { return x },
+
+  flat(x: readonly ErrorInfo[]): readonly string[] { return flattenErrors(x) },
+
+  grouped(x: readonly ErrorInfo[]): Readonly<Record<string, readonly string[]>> {
+    return Object.fromEntries(Object
+      .entries(groupErrorsBy(x, 'attribute'))
+      .map(([key, group]) => [key, flattenErrors(group)])
+    );
+  }
+};
+
+export function run<T extends Record<string, unknown>>(
+  attributes: T,
+  constraints: Record<keyof T, readonly Validator[]>,
+  globalOptions: GlobalOptions
+): ErrorInfo[] {
+  const results: ErrorInfo[] = [];
+
+  for (const [attribute, validators] of Object.entries(constraints)) {
+    const value = attributes[attribute];
+
+    for (const validator of validators) {
+      const result = validator(value, attribute, attributes, globalOptions);
+
+      const errors = result == null || result === true ? [] : Array.isArray(result) ? result : [result];
+      for (const error of errors) {
+        results.push({
+          value,
+          attribute,
+          validator: nameOf(validator),
+          error,
+        });
+      }
+    }
+  }
+
+  return results;
+}
+
+function process(
+  errors: ErrorInfo[],
+  options: GlobalOptions = {}
+): undefined | readonly string[] | Readonly<Record<string, readonly string[]>> | readonly ErrorInfo[] {
+
+  if (isEmpty(errors)) {
+    return undefined;
+  }
+
+  const S = options.prettify ?? prettify;
+  for (const errorInfo of errors) {
+    const {value, attribute} = errorInfo;
+    let {error} = errorInfo;
+
+    // if message starts with ^, means it's final, no need to prepend with field name
+    if (error.startsWith('^')) {
+      error = error.slice(1);
+    } else if (options.fullMessages !== false) {
+      error = capitalize(S(attribute)) + " " + error;
+    }
+
+    error = error.replace(/\\\^/g, "^");
+    errorInfo.error = tpl(error, { value: S(value) });
+  }
+
+  const formatting: keyof typeof formatters = options.format ?? "grouped";
+  if (typeof formatters[formatting] !== 'function') {
+    throw new Error(`Unknown formatting ${formatting}`);
+  }
+
+  const result = formatters[formatting](errors);
+  return isEmpty(result) ? undefined : result;
+}
+
+function validate<T extends Record<string, unknown>>(attributes: T, constraints: Record<keyof T, readonly Validator[]>, globalOptions: Omit<GlobalOptions, 'format'> & {format: 'raw'}): undefined | readonly ErrorInfo[];
+function validate<T extends Record<string, unknown>>(attributes: T, constraints: Record<keyof T, readonly Validator[]>, globalOptions: Omit<GlobalOptions, 'format'> & {format: 'flat'}): undefined | readonly string[];
+function validate<T extends Record<string, unknown>>(attributes: T, constraints: Record<keyof T, readonly Validator[]>, globalOptions: Omit<GlobalOptions, 'format'> & {format?: undefined | 'grouped'}): undefined | Readonly<Record<string, readonly string[]>>;
+function validate<T extends Record<string, unknown>>(attributes: T, constraints: Record<keyof T, readonly Validator[]>, globalOptions: GlobalOptions): undefined | readonly ErrorInfo[] | readonly string[] | Readonly<Record<string, readonly string[]>> {
+  const results = run(attributes, constraints, globalOptions);
+  return process(results, globalOptions);
+}
+
+export {validate};
+export default validate;
+
+export function single<T>(value: T, ...constraints: readonly Validator[]): true | readonly string[] {
+  const result = validate({value}, {value: constraints}, {
+    format: 'flat',
+    fullMessages: false,
+  });
+
+  return result !== undefined ? result : true;
+}
+
+export function multi<T extends Record<string, unknown>>(
+  value: T,
+  metadata: IEntityValidationMeta,
+  constraints: Record<keyof T, readonly Validator[]>,
   {restrictExtraFields = true, ... options}: IModelValidationOptions = {}
-): true | string[] {
-  for(let attribute of Object.keys(rules)) {
-    rules[attribute] = prepare(rules[attribute]);
-  }
+): true | readonly string[] {
 
-  const errors: string[] = [];
-  const fieldValidationRes = restrictExtraFields ? validateFieldNames<T>(value, metadata, errors): true;
-  const valueValidationRes = validateModel(value, rules as any, errors, options);
-  return <true>(fieldValidationRes && valueValidationRes) || errors;
-}
+  const errors: string[] = [
+    ...(validate(value, constraints, { ...options, format: 'flat', fullMessages: true }) ?? [])
+  ];
 
-function validateFieldNames<T>(obj: T, {fields}: IEntityValidationMeta, errors: string[] = []) {
-  return Object.keys(obj).map(fieldName => {
-    if (!fields.has(fieldName)) {
-      errors.push(`Field ${fieldName} is not expected by model`);
-      return false;
+  if (restrictExtraFields) {
+    for (const fieldName of Object.keys(value)) {
+      if (!Object.prototype.hasOwnProperty.call(constraints, fieldName)) {
+        errors.push(`${fieldName} is not expected`);
+      }
     }
-
-    return true;
-  }).every(x => x);
-}
-
-function validateModel<T>(obj: T, constraint: ValidatorInstance<any>, errors: string[], options?: object): boolean {
-  let validationErrors = lib(obj, constraint, { format: 'flat', ...options });
-  if (validationErrors) {
-    errors.push(...validationErrors);
-    return false;
   }
-  return true;
+
+  return errors.length === 0 ? true : errors;
 }

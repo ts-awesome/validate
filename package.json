@@ -6,6 +6,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
+    "lint": "eslint \"src/**/*.ts\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
@@ -14,16 +15,16 @@
     "uuid-validate": "0.0.3",
     "validate.js": "^0.13.1"
   },
-  "peerDependencies": {
-    "inversify": "^5.0.0"
-  },
   "devDependencies": {
     "@types/inversify": "^2.0.0",
     "@types/reflect-metadata": "^0.1.0",
     "@types/uuid-validate": "0.0.1",
     "@types/validate.js": "^0.11.0",
-    "inversify": "^5.0.0",
-    "typescript": "^3.7.4"
+    "@typescript-eslint/eslint-plugin": "^4.17.0",
+    "@typescript-eslint/parser": "^4.17.0",
+    "eslint": "^7.22.0",
+    "jest": "^26.6.3",
+    "typescript": "^4.2.0"
   },
   "author": "Volodymyr Iatsyshyn <viatsyshyn@gmail.com>",
   "license": "MIT"
