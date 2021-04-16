@@ -1,12 +1,26 @@
 import {Validator, ValidatorOptions} from "../interfaces";
 import {error, isDefined} from "./utils";
 
+/**
+ * AlphaNumProps interface
+ */
 export interface AlphaNumProps {
+  /**
+   * allow spaces?
+   */
   allowSpaces?: boolean
 }
 
+/**
+ * alphaNumeric validator checks if provide value has no special chars: !@#$%^&*(),.?":{}|<>]
+ */
 export function alphaNumeric(allowSpaces: boolean): Validator;
+
+/**
+ * alphaNumeric validator checks if provide value has no special chars: !@#$%^&*(),.?":{}|<>]
+ */
 export function alphaNumeric(options?: ValidatorOptions<AlphaNumProps>): Validator;
+
 export function alphaNumeric(o?: ValidatorOptions<AlphaNumProps> | boolean): Validator {
   const {message, ...validatorOptions}: ValidatorOptions<AlphaNumProps> = typeof o === 'boolean' ? {allowSpaces: o} : o ?? {};
 

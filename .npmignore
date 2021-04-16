@@ -2,3 +2,5 @@ index.ts
 *-lock.json
 tsconfig.json
 coverage
+public
+tests

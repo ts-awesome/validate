@@ -2,6 +2,7 @@ stages:
 - test
 - build
 - publish
+- pages
 
 build:
   stage: build
@@ -48,3 +49,17 @@ publish:
     reports:
       junit: junit.xml
       codequality: codequality.json
+
+# This file is a template, and might need editing before it works on your project.
+# Full project: https://gitlab.com/pages/plain-html
+pages:
+  stage: pages
+  image: node:14
+  script:
+    - npm ci
+    - npx typedoc --tsconfig ./tsconfig.json
+  artifacts:
+    paths:
+      - public
+  only:
+    - tags
