@@ -1,6 +1,8 @@
 {
   "extends": [
     "eslint:recommended",
+    "plugin:import/recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended"
   ],
   "env": {
@@ -17,8 +19,10 @@
     "@typescript-eslint/eslint-plugin"
   ],
   "rules": {
+    "no-console": "error",
     "@typescript-eslint/no-explicit-any": "warn",
     "@typescript-eslint/ban-types": "warn",
-    "@typescript-eslint/explicit-function-return-type": "warn"
+    "@typescript-eslint/explicit-function-return-type": "warn",
+    "import/no-unresolved": "off"
   }
 }

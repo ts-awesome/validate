@@ -57,6 +57,7 @@ pages:
   image: node:14
   script:
     - npm ci
+    - npm --no-git-tag-version version ${CI_COMMIT_TAG}
     - npx typedoc --tsconfig ./tsconfig.json
   artifacts:
     paths:
