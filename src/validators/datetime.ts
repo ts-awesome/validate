@@ -57,7 +57,7 @@ export function datetime(options: string | ValidatorOptions<DateTimeOptions> = {
   }
 
   if (latest !== undefined && !isString(latest && !isDate(latest) && !isFunction(latest))) {
-    throw new Error(`Datetime validator expects 'earliest' must be a date string, Date or DateProvider`);
+    throw new Error(`Datetime validator expects 'latest' must be a date string, Date or DateProvider`);
   }
 
   return function DateTimeValidator(value, key, attributes, globalOptions): undefined | string {
