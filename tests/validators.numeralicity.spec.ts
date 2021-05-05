@@ -67,7 +67,7 @@ describe("validators.numericality", function (){
     });
 
     it("allows numbers that are less than", () => {
-      expect(numericality(2.72, {lessThan: 3.14})).not.toBeDefined();
+      expect(numericality({lessThan: 3.14})(2.72, 'key', {}, {})).not.toBeDefined();
     });
 
     it("doesn't allow numbers that are greater than or equal to", () => {

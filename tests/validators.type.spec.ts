@@ -3,8 +3,8 @@ import {type} from "../src";
 describe('validators.type', function() {
 
   it("allows empty values", function() {
-    expect(type()(null, 'key', {}, {})).not.toBeDefined();
-    expect(type()(undefined, 'key', {}, {})).not.toBeDefined();
+    expect(type('string')(null, 'key', {}, {})).not.toBeDefined();
+    expect(type('string')(undefined, 'key', {}, {})).not.toBeDefined();
   });
 
   it("allows the correct type", function() {

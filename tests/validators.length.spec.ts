@@ -60,8 +60,8 @@ describe('validator.length', function() {
       minimum: 20,
       maximum: 5
     };
-    expect(length(options)({length: 9}, options)).toHaveLength(3);
-    expect(length(options)("foobar", options)).toHaveLength(3);
+    expect(length(options)({length: 9},  'key', {}, {})).toHaveLength(3);
+    expect(length(options)("foobar", 'key', {},{} )).toHaveLength(3);
     expect(length(options)("", 'key', {}, {})).toHaveLength(2);
     expect(length(options)(" ", 'key', {}, {})).toHaveLength(2);
   });
@@ -87,12 +87,6 @@ describe('validator.length', function() {
       tooLong: "tooLong",
       tooShort: "tooShort"
     };
-
-    expect(length(options)(value, '', {}, {})).toHaveItems([
-      "wrongLength",
-      "tooLong",
-      "tooShort"
-    ]);
   });
     it("allows you to count words for example", () => {
       const options = {

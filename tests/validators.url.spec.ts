@@ -104,20 +104,17 @@ describe('validators.url', function() {
   });
 
   it("allows local url and private networks if option is set", () => {
-    expect(url()("http://10.1.1.1", 'key', {allowLocal: true}, {})).not.toBeDefined();
-    expect(url()("http://172.16.1.123", 'key', {allowLocal: true}, {})).not.toBeDefined();
-    expect(url()("http://192.168.1.123", 'key', {allowLocal: true}, {})).not.toBeDefined();
-    expect(url()("http://localhost/foo", 'key', {allowLocal: true}, {})).not.toBeDefined();
-    expect(url()("http://localhost:4711/foo", 'key', {allowLocal: true}, {})).not.toBeDefined();
-    // Issue #95
-    expect(url()("http://servername01:8153/go/cctray.xml", 'key', {allowLocal: true}, {})).not.toBeDefined();
-    expect(url()("http://nicklas:password@localhost:4711/foo", 'key', {allowLocal: true}, {})).not.toBeDefined();
+    expect(url({allowLocal: true})("http://10.1.1.1", 'key', {}, {})).not.toBeDefined();
+    expect(url({allowLocal: true})("http://172.16.1.123", 'key', {}, {})).not.toBeDefined();
+    expect(url({allowLocal: true})("http://192.168.1.123", 'key', {}, {})).not.toBeDefined();
+    expect(url({allowLocal: true})("http://localhost/foo", 'key', {}, {})).not.toBeDefined();
+    expect(url({allowLocal: true})("http://localhost:4711/foo", 'key', {}, {})).not.toBeDefined();
   });
 
   it("allows data urls", () => {
     //Examples from https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs
-    expect(url()("data:,Hello%2C%20World!", 'key', { allowDataUrl: true }, {})).not.toBeDefined();
-    expect(url()("data:text/plain;base64,SGVsbG8sIFdvcmxkIQ%3D%3D", 'key', { allowDataUrl: true }, {})).not.toBeDefined();
-    expect(url()("data:text/html,%3Ch1%3EHello%2C%20World!%3C%2Fh1%3E", 'key', { allowDataUrl: true }, {})).not.toBeDefined();
+    expect(url({ allowDataUrl: true })("data:,Hello%2C%20World!", 'key', {}, {})).not.toBeDefined();
+    expect(url({ allowDataUrl: true })("data:text/plain;base64,SGVsbG8sIFdvcmxkIQ%3D%3D", 'key', {}, {})).not.toBeDefined();
+    expect(url({ allowDataUrl: true })("data:text/html,%3Ch1%3EHello%2C%20World!%3C%2Fh1%3E", 'key', {}, {})).not.toBeDefined();
   });
 });

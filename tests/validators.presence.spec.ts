@@ -31,6 +31,6 @@ describe('validator.presence', function() {
     const message = function() { return "foo"; };
     const options = {message: message}
     const value = null;
-    expect(presence(options)(value, 'key', {}, {})).toBe(message);
+    expect(presence(options)(value, 'key', {}, {})).toBe(message());
   });
 });
