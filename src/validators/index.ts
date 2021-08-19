@@ -14,3 +14,4 @@ export {type} from './type';
 export {url} from './url';
 export {uuid} from './uuid';
 export {inclusion, exclusion} from './within';
+export {password} from './password';
