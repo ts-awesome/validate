@@ -66,6 +66,7 @@ export interface ErrorInfo<T = unknown> {
 export interface GlobalOptions {
   format?: 'flat' | 'raw' | 'grouped';
   fullMessages?: boolean;
+  humanize?: boolean;
   prettify?: (obj: unknown) => string;
 
   [key: string]: unknown;

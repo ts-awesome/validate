@@ -90,7 +90,7 @@ function process(
     if (error.startsWith('^')) {
       error = error.slice(1);
     } else if (options.fullMessages !== false) {
-      error = capitalize(S(attribute)) + " " + error;
+      error = (options.humanize !== false ? capitalize(S(attribute)) : attribute) + " " + error;
     }
 
     error = error.replace(/\\\^/g, "^");
