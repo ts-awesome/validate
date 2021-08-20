@@ -57,8 +57,10 @@ export function datetime(options: string | ValidatorOptions<DateTimeOptions> = {
   }
 
   if (latest !== undefined && !isString(latest && !isDate(latest) && !isFunction(latest))) {
-    throw new Error(`Datetime validator expects 'earliest' must be a date string, Date or DateProvider`);
+    throw new Error(`Datetime validator expects 'latest' must be a date string, Date or DateProvider`);
   }
+
+  datetimeFormat(new Date(), tpl);
 
   return function DateTimeValidator(value, key, attributes, globalOptions): undefined | string {
     if (!isDefined(value)) {
@@ -70,7 +72,13 @@ export function datetime(options: string | ValidatorOptions<DateTimeOptions> = {
     }
 
     const parsed = toDate(value, tpl);
-    if(datetimeFormat(parsed, tpl) !== value) {
+    if (isNaN(parsed.getTime())) {
+      return error(message ?? notValid,"has invalid format (expected %{format})",
+        {value, key, validatorOptions, attributes, globalOptions, validator: 'datetime', format: tpl});
+    }
+
+    const formatted = datetimeFormat(parsed, tpl);
+    if(formatted !== value) {
       return error(message ?? notValid,"has invalid format (expected %{format})",
         {value, key, validatorOptions, attributes, globalOptions, validator: 'datetime', format: tpl});
     }

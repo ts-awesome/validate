@@ -3,7 +3,7 @@ import {error, isDefined, isObject} from "./utils";
 import validate from "../utils";
 import {ValidationMetaSymbol} from "../decorators";
 
-declare type Class = new (...args: unknown[]) => Record<string, unknown>;
+export type Class<T = unknown> = new (...args: unknown[]) => T;
 
 export interface ModelProps {
   model: Class
