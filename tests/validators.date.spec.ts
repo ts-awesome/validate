@@ -1,6 +1,14 @@
 import {datetime, date} from "../src";
 
 describe('validators.datetime', function () {
+  beforeEach(() => {
+    process.env.TZ = 'UTC';
+  });
+
+  afterEach(() => {
+    delete process.env.TZ;
+  });
+
   it("allows undefined values", () => {
     expect(datetime()(null, 'key', {}, {})).not.toBeDefined();
     expect(datetime()(undefined, 'key', {}, {})).not.toBeDefined();
@@ -17,7 +25,9 @@ describe('validators.datetime', function () {
 
 
   it('expects invalid format', () => {
-    expect(date({format:  "yyyy-MM-dd'T'HH:mm:ss.SSSX"})('2017-08-02T06:05:30.000Z', 'key', {}, {})).toEqual("has invalid format (expected yyyy-MM-dd'T'HH:mm:ss.SSSX)")
+    const validator = datetime({format:  "yyyy-MM-dd' 'HH:mm:ss"});
+    const actual = validator('2017-08-02 21:00', 'key', {}, {});
+    expect(actual).toEqual("has invalid format (expected yyyy-MM-dd' 'HH:mm:ss)")
   })
 
 })
