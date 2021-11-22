@@ -3,7 +3,9 @@ import {ValidationMetaSymbol} from "./decorators";
 
 import {multi} from "./utils";
 
-export class ModelValidator<T extends Record<string, unknown>> implements IValidator<T> {
+// suppress unit TS bug is fixed
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class ModelValidator<T extends Record<string, any>> implements IValidator<T> {
 
   private readonly metadata: IEntityValidationMeta;
 
