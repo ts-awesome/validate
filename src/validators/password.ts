@@ -48,7 +48,7 @@ export function password(o?: ValidatorOptions<PasswordProps> | 'low'|'weak'|'med
  */
 export function isStrongPassword(candidate: string, complexity: 'low'|'weak'|'medium'|'strong' = 'strong', minlength = 8): boolean {
   const p = candidate?.trim() ?? '';
-  if (p.length < Math.max(minlength, 8) || p.length > 63) {
+  if (p.length < Math.max(minlength, 6) || p.length > 63) {
     return false;
   }
 
@@ -64,6 +64,10 @@ const PASSWORD_COMPLEXITY_INDEX = {'low': 0, 'weak': 1, 'medium': 2, 'strong': 3
 export function getPasswordComplexity(p: string): 'none'|'low'|'weak'|'medium'|'strong'|'extra-strong' {
   if (!p || /^[0-9]*$/.test(p)) {
     return 'none';
+  }
+
+  if (p.length < 8) {
+    return 'weak';
   }
 
   if (p.length >= 12 && isStrong(p)) {
