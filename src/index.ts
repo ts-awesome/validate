@@ -6,3 +6,4 @@ export * from './model-validator';
 export * from './validators';
 export {single, multi} from './utils';
 export {ConstructorOf} from "./interfaces";
+export {ValidateAutomate} from './automate';

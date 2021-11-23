@@ -21,6 +21,7 @@
     "@types/uuid-validate": "0.0.1",
     "@typescript-eslint/eslint-plugin": "^4.17.0",
     "@typescript-eslint/parser": "^4.17.0",
+    "@ts-awesome/model-reader": "^1.0.0",
     "eslint": "^7.22.0",
     "eslint-formatter-gitlab": "^2.2.0",
     "eslint-plugin-import": "^2.22.1",
@@ -29,6 +30,9 @@
     "ts-jest": "^26.5.5",
     "typedoc": "^0.20.35",
     "typescript": "^4.2.0"
+  },
+  "peerDependencies": {
+    "@ts-awesome/model-reader": "^1.0.0"
   },
   "author": "Volodymyr Iatsyshyn <viatsyshyn@gmail.com>",
   "license": "MIT"
