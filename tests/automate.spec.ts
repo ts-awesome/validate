@@ -1,4 +1,4 @@
-import {ValidateAutomate, validate, presence, inclusion, uuid} from "../src";
+import {ValidateAutomate, validate, presence, inclusion, uuid, array, type} from "../src";
 
 describe('validate automate', () => {
 
@@ -8,6 +8,9 @@ describe('validate automate', () => {
 
     @validate('Kind', [presence(), inclusion([1, 2, 3])])
     public kind!: number;
+
+    @validate('Leafs', [presence(), array({element: [type('string')]})])
+    public leafs!: string[];
   }
 
   let automate: ValidateAutomate<TestModel>;
@@ -132,5 +135,14 @@ describe('validate automate', () => {
     expect(automate.update.uid).toBe(firstValidatorForUid);
     expect(automate.update.uid).toBe(firstValidatorForUid);
   })
+
+  it('update deep alias', () => {
+    automate.update.leafs(['a', 'b']);
+    automate.update.leafs[1](5 as never);
+
+    expect(automate.errors).toStrictEqual({
+      leafs: "Leafs [1] must be of the correct type string",
+    });
+  });
 
 })

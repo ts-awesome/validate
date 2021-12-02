@@ -7,7 +7,8 @@ interface UpdateFn<T> {
   (value: T): void;
 }
 
-type Updater<T> = { readonly [P in keyof T]: UpdateFn<T[P]>; }
+type Updater<T> = T extends any[] ? UpdaterObj<T> & UpdateFn<T> : T extends Record<string|number, unknown> ? UpdaterObj<T> & UpdateFn<Partial<T>> : UpdateFn<T>;
+type UpdaterObj<T> = { readonly [P in keyof T]: Updater<T[P]>; }
 type Class<T> = new (...args: unknown[]) => T;
 type Errors<T> = { [P in keyof T]?: string; }
 
@@ -74,7 +75,7 @@ export class ValidateAutomate<T> {
    * update current state with new values and validate
    */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public readonly update: ((values: Partial<T>) => this) & Updater<T> = ((): any => {
+  public readonly update: ((values: Partial<T>) => this) & UpdaterObj<T> = ((): any => {
     const result = (values: Partial<T>): this => {
       for(const [field, value] of Object.entries(values)) {
         this._state[field] = value;
@@ -83,17 +84,31 @@ export class ValidateAutomate<T> {
 
       return this;
     }
+    const map = new Map<string, Updater<unknown>>();
+    const buildProxy = (...path: string[]): Updater<unknown> => {
+      const key = path.join('--');
+      if (!map.has(key)) {
+        const updater = (value: unknown) => {
+          let root = this._state;
+          for(let i = 0; i < path.length - 1; ++i) {
+            root = root[path[i]];
+          }
 
-    const map = new Map<string, UpdateFn<unknown>>();
-    return new Proxy(result, {
-      get(target: (values: Partial<T>) => ValidateAutomate<T>, p: string | symbol): unknown {
-        const key = p.toString();
-        if (!map.has(key)) {
-          map.set(key, (value: unknown) => target({[key]: value} as never));
-        }
-        return map.get(key);
+          root[path[path.length - 1]] = value;
+          this._validate(path[0] as never, this._state[path[0]]);
+        };
+
+        map.set(key, new Proxy(updater, {
+          get(target: (values: unknown) => void, p: string | symbol): Updater<unknown> {
+            return buildProxy(...path, p.toString());
+          }
+        }))
       }
-    });
+
+      return map.get(key)!;
+    }
+
+    return buildProxy();
   })();
 
   /**
@@ -175,4 +190,3 @@ export class ValidateAutomate<T> {
     }
   }
 }
-
