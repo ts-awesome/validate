@@ -98,7 +98,7 @@ export class ValidateAutomate<T> {
           this._validate(path[0] as never, this._state[path[0]]);
         };
 
-        map.set(key, new Proxy(updater, {
+        map.set(key, new Proxy(key ? updater : result, {
           get(target: (values: unknown) => void, p: string | symbol): Updater<unknown> {
             return buildProxy(...path, p.toString());
           }
