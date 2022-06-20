@@ -14,7 +14,7 @@ export class ModelValidator<T extends Record<string, any>> implements IValidator
   }
 
   validate(value: T, options: IModelValidationOptions = {}): true | readonly string[] {
-    return multi(value, this.metadata, this.getConstraint<T>(), options);
+    return multi(value, this.getConstraint<T>(), options);
   }
 
   private getConstraint<T>(): Record<keyof T, readonly Validator[]> {

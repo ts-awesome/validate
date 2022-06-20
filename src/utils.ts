@@ -106,15 +106,14 @@ function process(
   return isEmpty(result) ? undefined : result;
 }
 
-function validate<T extends Record<string, unknown>>(attributes: T, constraints: Record<keyof T, readonly Validator[]>, globalOptions: Omit<GlobalOptions, 'format'> & {format: 'raw'}): undefined | readonly ErrorInfo[];
-function validate<T extends Record<string, unknown>>(attributes: T, constraints: Record<keyof T, readonly Validator[]>, globalOptions: Omit<GlobalOptions, 'format'> & {format: 'flat'}): undefined | readonly string[];
-function validate<T extends Record<string, unknown>>(attributes: T, constraints: Record<keyof T, readonly Validator[]>, globalOptions?: Omit<GlobalOptions, 'format'> & {format?: undefined | 'grouped'}): undefined | Readonly<Record<string, readonly string[]>>;
-function validate<T extends Record<string, unknown>>(attributes: T, constraints: Record<keyof T, readonly Validator[]>, globalOptions: GlobalOptions = {}): undefined | readonly ErrorInfo[] | readonly string[] | Readonly<Record<string, readonly string[]>> {
+export function validate<T extends Record<string, unknown>>(attributes: T, constraints: Record<keyof T, readonly Validator[]>, globalOptions: Omit<GlobalOptions, 'format'> & {format: 'raw'}): undefined | readonly ErrorInfo[];
+export function validate<T extends Record<string, unknown>>(attributes: T, constraints: Record<keyof T, readonly Validator[]>, globalOptions: Omit<GlobalOptions, 'format'> & {format: 'flat'}): undefined | readonly string[];
+export function validate<T extends Record<string, unknown>>(attributes: T, constraints: Record<keyof T, readonly Validator[]>, globalOptions?: Omit<GlobalOptions, 'format'> & {format?: undefined | 'grouped'}): undefined | Readonly<Record<string, readonly string[]>>;
+export function validate<T extends Record<string, unknown>>(attributes: T, constraints: Record<keyof T, readonly Validator[]>, globalOptions: GlobalOptions = {}): undefined | readonly ErrorInfo[] | readonly string[] | Readonly<Record<string, readonly string[]>> {
   const results = run(attributes, constraints, globalOptions);
   return process(results, globalOptions);
 }
 
-export {validate};
 export default validate;
 
 export function single<T>(value: T, ...constraints: readonly Validator[]): true | readonly string[] {
@@ -128,7 +127,6 @@ export function single<T>(value: T, ...constraints: readonly Validator[]): true 
 
 export function multi<T extends Record<string, unknown>>(
   value: T,
-  metadata: IEntityValidationMeta,
   constraints: Record<keyof T, readonly Validator[]>,
   {restrictExtraFields = true, ... options}: IModelValidationOptions = {}
 ): true | readonly string[] {

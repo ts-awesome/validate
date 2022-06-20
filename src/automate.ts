@@ -78,7 +78,9 @@ export class ValidateAutomate<T> {
   public readonly update: ((values: Partial<T>) => this) & UpdaterObj<T> = ((): any => {
     const result = (values: Partial<T>): this => {
       for(const [field, value] of Object.entries(values)) {
-        this._state[field] = value;
+        this._runInAction(() => {
+          this._state[field] = value;
+        });
         this._validate(field as never, value);
       }
 
@@ -94,7 +96,9 @@ export class ValidateAutomate<T> {
             root = root[path[i]];
           }
 
-          root[path[path.length - 1]] = value;
+          this._runInAction(() => {
+            root[path[path.length - 1]] = value;
+          });
           this._validate(path[0] as never, this._state[path[0]]);
         };
 
@@ -178,6 +182,10 @@ export class ValidateAutomate<T> {
     }
 
     return this.valid;
+  }
+
+  private _runInAction(action: () => void): void {
+    action();
   }
 
   private _validate(field: keyof T, value: unknown): void {
