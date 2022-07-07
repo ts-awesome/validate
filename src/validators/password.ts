@@ -62,12 +62,12 @@ const PASSWORD_COMPLEXITY_INDEX = {'low': 0, 'weak': 1, 'medium': 2, 'strong': 3
  * @return {string} 'none'|'low'|'weak'|'medium'|'strong'|'extra-strong'
  */
 export function getPasswordComplexity(p: string): 'none'|'low'|'weak'|'medium'|'strong'|'extra-strong' {
-  if (!p || /^[0-9]*$/.test(p)) {
+  if (!p || /^[0-9]*$/.test(p) || p.length < 6) {
     return 'none';
   }
 
   if (p.length < 8) {
-    return 'weak';
+    return 'low';
   }
 
   if (p.length >= 12 && isStrong(p)) {
