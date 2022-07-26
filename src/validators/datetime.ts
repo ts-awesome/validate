@@ -52,11 +52,11 @@ export function datetime(options: string | ValidatorOptions<DateTimeOptions> = {
     ...validatorOptions
   }: ValidatorOptions<DateTimeOptions> = isString(options) ? {format: options} : options;
 
-  if (earliest !== undefined && !isString(earliest && !isDate(earliest) && !isFunction(earliest))) {
+  if (earliest !== undefined && !isString(earliest) && !isDate(earliest) && !isFunction(earliest)) {
     throw new Error(`Datetime validator expects 'earliest' must be a date string, Date or DateProvider`);
   }
 
-  if (latest !== undefined && !isString(latest && !isDate(latest) && !isFunction(latest))) {
+  if (latest !== undefined && !isString(latest) && !isDate(latest) && !isFunction(latest)) {
     throw new Error(`Datetime validator expects 'latest' must be a date string, Date or DateProvider`);
   }
 
