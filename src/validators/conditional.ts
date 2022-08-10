@@ -1,14 +1,11 @@
 import { Validator } from "../interfaces"
+import { match } from "@ts-awesome/simple-query"
 
-export function conditional<TModel>(options: ConditionalOptions<TModel>): Validator {
-  const { when, check } = options
+
+export function conditional<TModel>(...args: ConditionalOptions<TModel>[]): Validator {
 
   return function ConditionalValidator (value, key, attributes, globalOptions) {
-    if (when(attributes as TModel) == false) {
-      return
-    }
-
-    const rules: Validator[] = Array.isArray(check) ? check : [check]
+    const rules: Validator[] = matchQueriesAndGetRules(args, attributes as TModel)
 
     for (let i = 0; i < rules.length; i++) {
       const rule = rules[i]
@@ -20,7 +17,27 @@ export function conditional<TModel>(options: ConditionalOptions<TModel>): Valida
   }
 }
 
+
+function matchQueriesAndGetRules<TModel> (conditions: ConditionalOptions<TModel>[], model: TModel): Validator[] {
+  for (let i = 0; i < conditions.length; i++) {
+    const { query, check } = conditions[i]
+    const queryIsPositive = !query
+      || (typeof query === 'function' && query(model))
+      || (typeof query !== 'function' && match(model as never, query))
+
+    if (queryIsPositive) {
+      return Array.isArray(check) ? check : [check]
+    }
+  }
+
+  return []
+}
+
+
 export interface ConditionalOptions<TModel> {
-  when: (model: Readonly<TModel>) => boolean
+  query?: Predicate<TModel>|Partial<TModel>
   check: Validator|Validator[]
 }
+
+
+type Predicate<TModel> = (m: TModel) => boolean
