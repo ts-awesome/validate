@@ -1,5 +1,5 @@
 import { Validator } from "../interfaces"
-import { match } from "@ts-awesome/simple-query"
+import { ISimpleQuery, match, ValidQueryModelSignature } from "@ts-awesome/simple-query"
 
 
 export function conditional<TModel>(...args: ConditionalOptions<TModel>[]): Validator {
@@ -35,7 +35,7 @@ function matchQueriesAndGetRules<TModel> (conditions: ConditionalOptions<TModel>
 
 
 export interface ConditionalOptions<TModel> {
-  query?: Predicate<TModel>|Partial<TModel>
+  query?: Predicate<TModel>|ISimpleQuery<ValidQueryModelSignature<TModel>>
   check: Validator|Validator[]
 }
 

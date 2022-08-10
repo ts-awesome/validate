@@ -1,3 +1,4 @@
+import { AND_OP } from "@ts-awesome/simple-query"
 import { boolean, inclusion, ModelValidator, required, validate } from "../src"
 import { Validator } from "../src/interfaces"
 import { conditional } from "../src/validators/conditional"
@@ -63,6 +64,31 @@ describe('validators.conditional', () => {
 
 		expect(validator('AnyValue', 'AnyKey', {}, {}))
 			.toBeUndefined()
+	})
+
+
+	it('should let you to use TsSimpleQuery features as well and support typization', () => {
+		interface IData {
+			a: number,
+			b: number,
+		}
+
+		const validator = conditional<IData>({
+			query: {
+				[AND_OP]: [
+					{ a: 3 },
+					{ b: 34 },
+				]
+			},
+			check: [FailRule('Query Works')]
+		})
+
+		expect(validator('', '', { a: 3, b: 34 }, {}))
+			.toBe('Query Works')
+		expect(validator('', '', { a: 4, b: 34 }, {}))
+			.not.toBeDefined()
+		expect(validator('', '', { a: 3, b: 44 }, {}))
+			.not.toBeDefined()
 	})
 
 
