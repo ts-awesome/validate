@@ -14,9 +14,8 @@ describe('validators.conditional', () => {
 			data
 		]
 
-		for (let i = 0; i < positiveQueries.length; i++) {
-			const query = positiveQueries[i]
-			const validator = conditional({ query, check: [FailRule(EXPECTED_ERROR)]})
+		for (const query of positiveQueries) {
+			const validator = conditional({ when: query, check: [FailRule(EXPECTED_ERROR)]})
 
 			const error = validator('any', 'any', data, {})
 			expect(error)
@@ -33,9 +32,8 @@ describe('validators.conditional', () => {
 			{ a: 'Not123' }
 		]
 
-		for (let i = 0; i < nagetiveQueries.length; i++) {
-			const query = nagetiveQueries[i]
-			const validator = conditional({ query, check: [FailRule(UNEXPECTED_ERROR)]})
+		for (const query of nagetiveQueries) {
+			const validator = conditional({ when: query, check: [FailRule(UNEXPECTED_ERROR)]})
 
 			const error = validator('any', 'any', data, {})
 			expect(error)
@@ -46,9 +44,9 @@ describe('validators.conditional', () => {
 
 	it('should always use rules with first positive query', () => {
 		const validator = conditional(
-			{ query: () => false, check: [FailRule(UNEXPECTED_ERROR)] },
-			{ query: () => true, check: [FailRule(EXPECTED_ERROR)] },
-			{ query: () => true, check: [FailRule(UNEXPECTED_ERROR)] }
+			{ when: () => false, check: [FailRule(UNEXPECTED_ERROR)] },
+			{ when: () => true, check: [FailRule(EXPECTED_ERROR)] },
+			{ when: () => true, check: [FailRule(UNEXPECTED_ERROR)] }
 		)
 
 		const error = validator('Any', 'key', {}, {})
@@ -58,7 +56,7 @@ describe('validators.conditional', () => {
 
 	it('should not throw any error when there is no rules', () => {
 		const validator = conditional({
-			query: () => true, 	// query is positive
+			when: () => true, 	// query is positive
 			check: []						// but no rules
 		})
 
@@ -74,7 +72,7 @@ describe('validators.conditional', () => {
 		}
 
 		const validator = conditional<IData>({
-			query: {
+			when: {
 				[AND_OP]: [
 					{ a: 3 },
 					{ b: 34 },
@@ -115,7 +113,7 @@ class TestModel {
 
 	@validate([
 		conditional({
-			query: (m: TestModel) => m.shouldValidate,
+			when: (m: TestModel) => m.shouldValidate,
 			check: [required(), inclusion(['valid'])]
 		})
 	])

@@ -7,8 +7,7 @@ export function conditional<TModel>(...args: ConditionalOptions<TModel>[]): Vali
   return function ConditionalValidator (value, key, attributes, globalOptions) {
     const rules: Validator[] = matchQueriesAndGetRules(args, attributes as TModel)
 
-    for (let i = 0; i < rules.length; i++) {
-      const rule = rules[i]
+    for (const rule of rules) {
       const err = rule(value, key, attributes, globalOptions)
       if (err) {
         return err
@@ -19,13 +18,12 @@ export function conditional<TModel>(...args: ConditionalOptions<TModel>[]): Vali
 
 
 function matchQueriesAndGetRules<TModel> (conditions: ConditionalOptions<TModel>[], model: TModel): Validator[] {
-  for (let i = 0; i < conditions.length; i++) {
-    const { query, check } = conditions[i]
-    const queryIsPositive = !query
-      || (typeof query === 'function' && query(model))
-      || (typeof query !== 'function' && match(model as never, query))
+  for (const { when, check } of conditions) {
+    const shouldValidate = !when
+      || (typeof when === 'function' && when(model))
+      || (typeof when !== 'function' && match(model as never, when))
 
-    if (queryIsPositive) {
+    if (shouldValidate) {
       return Array.isArray(check) ? check : [check]
     }
   }
@@ -35,8 +33,8 @@ function matchQueriesAndGetRules<TModel> (conditions: ConditionalOptions<TModel>
 
 
 export interface ConditionalOptions<TModel> {
-  query?: Predicate<TModel>|ISimpleQuery<ValidQueryModelSignature<TModel>>
-  check: Validator|Validator[]
+  when?: Predicate<TModel> | ISimpleQuery<ValidQueryModelSignature<TModel>>
+  check: Validator | Validator[]
 }
 
 
