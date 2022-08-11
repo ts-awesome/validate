@@ -1,4 +1,4 @@
-import {array} from "../src";
+import {array, inclusion, model, required, validate} from "../src";
 
 describe('validators.array', function (){
   it('allows not defined values', () => {
@@ -22,4 +22,53 @@ describe('validators.array', function (){
       }, notValidLength: 'length is invalid'})([1, 3, 4], 'key', {}, {})).toEqual('length is invalid');
   });
 
+  it('should return array of errors for individual items', () => {
+    const items: ItemModel[] = [
+      { prop: 'valid' },
+      { prop: 'invalid' },
+      { prop: 'valid' },
+      { prop: 'invalid' },
+    ]
+    const expectedErrors = [
+      "[1] Prop value (invalid) is not allowed",
+      "[3] Prop value (invalid) is not allowed"
+    ]
+
+    const validator = array({ element: [model(ItemModel)] })
+    const errors = validator(items, 'key', {}, {})
+    expect(errors)
+      .toStrictEqual(expectedErrors)
+  })
+
+  it('should works well with arrays of arrays', () => {
+    const items: ItemModel[][] = [
+      [
+        { prop: 'valid' },
+        { prop: 'invalid' }
+      ],
+      [
+        { prop: 'valid' },
+        { prop: 'invalid' }
+      ]
+    ]
+    const expectedErrors = [
+      "[0] [1] Prop value (invalid) is not allowed",
+      "[1] [1] Prop value (invalid) is not allowed"
+    ]
+    const validator = array({
+      element: [array({
+        element: [model(ItemModel)]
+      })]
+    })
+    const errors = validator(items, 'key', {}, {})
+    expect(errors)
+      .toStrictEqual(expectedErrors)
+  })
 })
+
+
+
+class ItemModel {
+  @validate([inclusion(['valid'])])
+  prop: 'valid'|'invalid'
+}
