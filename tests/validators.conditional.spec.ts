@@ -90,6 +90,37 @@ describe('validators.conditional', () => {
 	})
 
 
+	it('should match queries well and validate depends on the relevant rules', () => {
+		const NO_ERRORS = undefined
+		const ERROR_A = 'ErrorA'
+		const ERROR_B = 'ErrorB'
+
+		const validator = conditional(
+			{
+				when: { a: true },
+				check: [inclusion({ within:['a'], message: ERROR_A })]
+			},
+			{
+				check: [inclusion({ within:['b'], message: ERROR_B })]
+			}
+		)
+
+		const examples = [
+			{ model: { a: true, value: 'a' }, returnedError: NO_ERRORS },
+			{ model: { a: true, value: 'b' }, returnedError: [ERROR_A] },
+			{ model: { a: true, value: 'c' }, returnedError: [ERROR_A] },
+			{ model: { a: false, value: 'a' }, returnedError: [ERROR_B] },
+			{ model: { a: false, value: 'b' }, returnedError: NO_ERRORS },
+			{ model: { a: false, value: 'c' }, returnedError: [ERROR_B] },
+		]
+
+		for (const { model, returnedError } of examples) {
+			expect(validator(model.value, 'key', model, {}))
+				.toStrictEqual(returnedError)
+		}
+	})
+
+
 	it('should work well with simple model', () => {
 		const validator = new ModelValidator(TestModel)
 
