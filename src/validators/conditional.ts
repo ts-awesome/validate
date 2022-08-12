@@ -5,7 +5,7 @@ import { single } from "../utils"
 
 export function conditional<TModel>(...args: ConditionalOptions<TModel>[]): Validator {
 
-  return function ConditionalValidator (value, key, attributes, globalOptions) {
+  return function ConditionalValidator (value, key, attributes, globalOptions): (readonly string[]) | undefined {
     const rules: Validator[] = matchQueriesAndGetRules(args, attributes as TModel)
 
     const errors = single(value, ...rules)
