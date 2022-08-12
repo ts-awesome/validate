@@ -14,6 +14,7 @@ export function conditional<TModel>(...args: ConditionalOptions<TModel>[]): Vali
   }
 }
 
+
 function matchQueriesAndGetRules<TModel> (conditions: ConditionalOptions<TModel>[], model: TModel): Validator[] {
   for (const { when, check } of conditions) {
     const shouldValidate = !when
@@ -30,9 +31,9 @@ function matchQueriesAndGetRules<TModel> (conditions: ConditionalOptions<TModel>
 
 
 export interface ConditionalOptions<TModel> {
-  when?: Predicate<TModel> | ISimpleQuery<ValidQueryModelSignature<TModel>>
+  when?: ConditionPredicate<TModel> | ISimpleQuery<ValidQueryModelSignature<TModel>>
   check: Validator | Validator[]
 }
 
 
-type Predicate<TModel> = (m: TModel) => boolean
+type ConditionPredicate<TModel> = (m: TModel) => boolean
