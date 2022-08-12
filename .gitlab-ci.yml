@@ -10,7 +10,7 @@ build:
   only:
   - master
   - develop
-  - merge_requests
+  - merge_request
   script:
   - npm ci
   - npx eslint --format gitlab "src/**/*.ts"
