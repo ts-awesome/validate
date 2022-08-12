@@ -1,8 +1,7 @@
 import { AND_OP } from "@ts-awesome/simple-query"
-import { boolean, inclusion, model, ModelValidator, required, validate } from "../src"
+import { boolean, inclusion, ModelValidator, required, validate } from "../src"
 import { Validator } from "../src/interfaces"
 import { conditional } from "../src/validators/conditional"
-import { array } from "../src/validators/array"
 
 
 describe('validators.conditional', () => {
@@ -20,7 +19,7 @@ describe('validators.conditional', () => {
 
 			const error = validator('any', 'any', data, {})
 			expect(error)
-				.toBe(EXPECTED_ERROR)
+				.toStrictEqual([EXPECTED_ERROR])
 		}
 	})
 
@@ -51,7 +50,7 @@ describe('validators.conditional', () => {
 		)
 
 		const error = validator('Any', 'key', {}, {})
-		expect(error).toBe(EXPECTED_ERROR)
+		expect(error).toStrictEqual([EXPECTED_ERROR])
 	})
 
 
@@ -83,7 +82,7 @@ describe('validators.conditional', () => {
 		})
 
 		expect(validator('', '', { a: 3, b: 34 }, {}))
-			.toBe('Query Works')
+			.toStrictEqual(['Query Works'])
 		expect(validator('', '', { a: 4, b: 34 }, {}))
 			.not.toBeDefined()
 		expect(validator('', '', { a: 3, b: 44 }, {}))
@@ -105,76 +104,6 @@ describe('validators.conditional', () => {
 		expect(validator.validate({ shouldValidate: true, conditionalField: 'NotValid' }))
 			.not.toBe(true)
 	})
-
-
-	it('should return all errors from check-array', () => {
-		const validator = conditional({
-			when: () => true,
-			check: [FailRule(EXPECTED_ERROR), FailRule(EXPECTED_ERROR)]
-		})
-
-		const errors = validator('no', 'matter', {}, {})
-		expect(errors)
-			.toStrictEqual([EXPECTED_ERROR, EXPECTED_ERROR])
-	})
-
-
-	it('should return string[] with ONLY ONE error if that error was already wrapped by its rule', () => {
-		const validator = conditional({
-			when: () => true,
-			check: array({
-				element: [model(ItemModel)],
-				notValidElement: EXPECTED_ERROR
-			})
-		})
-
-		const brokenItems: ItemModel[] = [
-			{ prop: 'invalid' }
-		]
-
-		const errors = validator(brokenItems, 'key', {}, {})
-		expect(errors)
-			.toStrictEqual([EXPECTED_ERROR])
-	})
-	
-
-	it('should return string[], NOT (strin | string[])[]', () => {
-		/* When two or more rules returns errors like string[]
-			conditional should decompose inner arrays
-			and return one dimentional array of errors - string[]
-		*/
-
-		const validator = conditional({
-			when: () => true,
-			check: [
-				array({
-					element: [model(ItemModel)],
-					notValidElement: EXPECTED_ERROR
-				}),
-				array({
-					element: [model(ItemModel)],
-					notValidElement: EXPECTED_ERROR
-				})
-			]
-		})
-
-		const brokenItems: ItemModel[] = [
-			{ prop: 'invalid' },
-			{ prop: 'invalid' }
-		]
-
-		// Two errors from first array-rule validator and Two from second one
-		const expectErrors = [
-			EXPECTED_ERROR,
-			EXPECTED_ERROR,
-			EXPECTED_ERROR,
-			EXPECTED_ERROR
-		]
-
-		const errors = validator(brokenItems, 'key', {}, {})
-		expect(errors)
-			.toStrictEqual(expectErrors)
-	})
 })
 
 
@@ -191,6 +120,7 @@ class TestModel {
 	public conditionalField?: string
 }
 
+
 /** Fails always with result msg */
 function FailRule(msg: string): Validator {
 	return (_) => {
@@ -198,10 +128,6 @@ function FailRule(msg: string): Validator {
 	}
 }
 
+
 const EXPECTED_ERROR = 'Expected Error'
 const UNEXPECTED_ERROR = 'Unexpected Error'
-
-class ItemModel {
-	@validate([inclusion(['valid'])])
-	prop: 'valid'|'invalid'
-}
