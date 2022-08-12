@@ -10,10 +10,7 @@ export function conditional<TModel>(...args: ConditionalOptions<TModel>[]): Vali
 
     const errors = single(value, ...rules)
 
-    if (errors === true) {
-      return
-    }
-    return errors
+    return Array.isArray(errors) ? errors : undefined
   }
 }
 
