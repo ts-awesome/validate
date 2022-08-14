@@ -1,6 +1,6 @@
 import _ from '@ts-awesome/model-reader';
-import {single} from './utils';
-import {IEntityValidationMeta} from './interfaces';
+import validate from './utils';
+import {IEntityValidationMeta, Validator} from './interfaces';
 import {ValidationMetaSymbol} from './decorators';
 
 interface UpdateFn<T> {
@@ -189,10 +189,17 @@ export class ValidateAutomate<T> {
   }
 
   private _validate(field: keyof T, value: unknown): void {
-    const result = single(value, ...this._metadata.fields.get(field.toString()) ?? []);
-    if (result !== true) {
+    const rules = this._metadata.fields.get(field.toString()) ?? []
+    const wrappedRules = { [field]: rules } as Record<keyof T, readonly Validator<unknown>[]>
+    const result = validate(this.values, wrappedRules, {
+      format: 'flat',
+      fullMessages: false,
+    });
+  
+    if (result !== undefined) {
       const [error] = result;
-      this.set(field, `${this._metadata.aliases.get(field.toString()) ?? field} ${error ?? 'is invalid'}`)
+      const alias = this._metadata.aliases.get(field.toString()) ?? field
+      this.set(field, `${alias.toString()} ${error ?? 'is invalid'}`)
     } else {
       this.clear(field);
     }

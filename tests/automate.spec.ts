@@ -1,4 +1,5 @@
 import {ValidateAutomate, validate, presence, inclusion, uuid, array, type} from "../src";
+import { conditional } from "../src/validators/conditional";
 
 describe('validate automate', () => {
 
@@ -145,4 +146,29 @@ describe('validate automate', () => {
     });
   });
 
+
+  it('should support conditional well', () => {
+    const EXPECTED_ERROR = 'expectedError'
+    class TestModel {
+      @validate([])
+      shouldValidate: boolean
+
+      @validate([conditional({
+        when: { shouldValidate: true },
+        check: [inclusion({ within: ['valid'], message: EXPECTED_ERROR })]
+      })])
+      prop: string
+    }
+
+    const automate = new ValidateAutomate(TestModel)
+    automate.update({ shouldValidate: false })
+    expect(automate.errors)
+      .toStrictEqual({})
+    
+    automate.update({ shouldValidate: true, prop: 'notValid' })
+    expect(automate.errors)
+      .toStrictEqual({
+        prop: `prop ${EXPECTED_ERROR}`
+      })
+  })
 })
