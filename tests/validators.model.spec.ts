@@ -1,6 +1,7 @@
 import {model} from "../src/validators/model";
-import {array, presence, type} from "../src/validators";
+import {array, inclusion, presence, type} from "../src/validators";
 import {validate} from "../src";
+import { conditional } from "../src/validators/conditional";
 
 class Model {
   @validate([presence(), type('string')])
@@ -32,4 +33,32 @@ describe('validators.model', function () {
     expect(model(Model)({test: 'ok', leafs: [{test:false}]}, 'key', {}, {})).toEqual(['Leafs [0] Test must be of the correct type string']);
   });
 
+
+  it('should support conditional-rule as well', () => {
+    class TestSubModel {
+      @validate([presence()])
+      shouldValidate!: boolean
+
+      @validate([
+        conditional({
+          when: { shouldValidate: true },
+          check: [inclusion(['valid'])]
+        })
+      ])
+      prop?: string
+    }
+
+    const validator = model(TestSubModel)
+    const tests = [
+      { model: { shouldValidate: false, prop: 'valid' }, error: undefined },
+      { model: { shouldValidate: false, prop: 'invalid' }, error: undefined },
+      { model: { shouldValidate: true, prop: 'invalid' }, error: ["Prop value (invalid) is not allowed"] },
+      { model: { shouldValidate: true, prop: 'valid' }, error: undefined },
+    ]
+
+    for (const { model, error } of tests) {
+      expect(validator(model, 'key', {}, {}))
+        .toStrictEqual(error)
+    }
+  })
 })
