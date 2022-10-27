@@ -171,4 +171,18 @@ describe('validate automate', () => {
         prop: `prop ${EXPECTED_ERROR}`
       })
   })
+
+  it('call/apply', () => {
+    expect(JSON.stringify(automate.update.uid)).toBe('"[Proxy: update.uid]"');
+
+    automate.update.uid?.('test');
+    expect(automate.values.uid).toBe('test');
+
+    automate.update.uid.call(null, 'test2');
+    expect(automate.values.uid).toBe('test2');
+
+    automate.update.uid.apply(null, ['test3']);
+    expect(automate.values.uid).toBe('test3');
+  });
+
 })

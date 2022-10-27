@@ -102,8 +102,18 @@ export class ValidateAutomate<T> {
           this._validate(path[0] as never, this._state[path[0]]);
         };
 
-        map.set(key, new Proxy(key ? updater : result, {
+        const target = key ? updater : result;
+        map.set(key, new Proxy(target, {
           get(target: (values: unknown) => void, p: string | symbol): Updater<unknown> {
+            if (p === 'toJSON') {
+              return () => `[Proxy: update${(key ? '.' : '')}${key.replace(/--/gi, '.')}]`;
+            }
+
+            // eslint-disable-next-line no-prototype-builtins
+            if (typeof target[p] === 'function') {
+              return target[p];
+            }
+
             return buildProxy(...path, p.toString());
           }
         }))
